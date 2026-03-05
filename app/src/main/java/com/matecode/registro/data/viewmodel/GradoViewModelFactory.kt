@@ -1,5 +1,6 @@
 package com.matecode.registro.data.viewmodel
 
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.matecode.registro.data.dao.AlumnoDao
@@ -23,7 +24,7 @@ class GradoViewModelFactory(
                 alumnoDao,
                 asistenciaDao,
                 mesCerradoDao,
-                gradoDao
+                gradoDao,
             ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")

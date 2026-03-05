@@ -26,7 +26,8 @@ fun AlumnoRow(
     alumno: AlumnoEntity,
     estadoActual: EstadoAsistencia?,
     enabled: Boolean,
-    onGuardarAsistencia: (EstadoAsistencia) -> Unit
+    onGuardarAsistencia: (EstadoAsistencia) -> Unit,
+    onEstadoChange: (EstadoAsistencia) -> Unit
 ) {
 
     var seleccionado by rememberSaveable(estadoActual) {
@@ -68,14 +69,13 @@ fun AlumnoRow(
                 // 🔹 PRESENTE
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("Presente")
+                    val mesCerrado = false
                     RadioButton(
                         selected = seleccionado == EstadoAsistencia.PRESENTE,
-                        enabled = enabled,
                         onClick = {
-                            if (!enabled) return@RadioButton
-                            seleccionado = EstadoAsistencia.PRESENTE
-                            onGuardarAsistencia(EstadoAsistencia.PRESENTE)
-                        }
+                            onEstadoChange(EstadoAsistencia.PRESENTE)
+                        },
+                        enabled = !mesCerrado
                     )
                 }
 
@@ -106,10 +106,10 @@ fun AlumnoRow(
             ) {
 
                 val colorBoton = when (seleccionado) {
-                    EstadoAsistencia.PRESENTE -> Color(0xFF2E7D32)
-                    EstadoAsistencia.AUSENTE_JUSTIFICADA -> Color(0xFFD32F2F)
-                    EstadoAsistencia.AUSENTE_INJUSTIFICADA -> Color(0xFFB71C1C)
-                    EstadoAsistencia.DEFINIR_DESPUES -> Color(0xFFFFA000)
+                    EstadoAsistencia.PRESENTE -> Color(0xFF388E3C)
+                    EstadoAsistencia.AUSENTE_JUSTIFICADA -> Color(0xFFE53935)
+                    EstadoAsistencia.AUSENTE_INJUSTIFICADA -> Color(0xFFE53935)
+                    EstadoAsistencia.DEFINIR_DESPUES -> Color(0xFFFB8C00)
                     else -> Color.Gray
                 }
 
@@ -123,8 +123,14 @@ fun AlumnoRow(
 
                 Button(
                     onClick = { },
-                    enabled = false,
-                    colors = ButtonDefaults.buttonColors(containerColor = colorBoton),
+                    enabled = true,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorBoton,
+                        contentColor = Color.White,
+                        disabledContainerColor = colorBoton,
+
+                    ),
+
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(textoBoton)

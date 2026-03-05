@@ -1,5 +1,6 @@
 package com.matecode.registro.data.viewmodel
 
+
 import android.content.Context
 import com.matecode.registro.data.dao.AlumnoDao
 import androidx.lifecycle.ViewModel
@@ -34,17 +35,27 @@ class GradoViewModel(
     private val alumnoDao: AlumnoDao,
     private val asistenciaDao: AsistenciaDao,
     private val mesCerradoDao: MesCerradoDao,
-    private val gradoDao: GradoDao
+    private val gradoDao: GradoDao,
 
 
-) : ViewModel() {
 
+    ) : ViewModel() {
+    init {
+        viewModelScope.launch {
+            gradoDao.obtenerGrados().collect {
+                _grados.value = it
+            }
+        }
+    }
     private lateinit var gradoMap: Map<Pair<Grado, Division>, Long>
+
     suspend fun estaMesCerrado(): Boolean {
+
         val estado = mesCerradoDao.obtenerEstadoMes(
             currentGradoId,
             currentYearMonth.toString()
         )
+
         return estado?.cerrado == true
     }
 
@@ -77,6 +88,8 @@ class GradoViewModel(
     private val _pendientesDelMes = MutableStateFlow<List<AsistenciaEntity>>(emptyList())
     val pendientesDelMes: StateFlow<List<AsistenciaEntity>> = _pendientesDelMes
 
+    private val _grados = MutableStateFlow<List<GradoEntity>>(emptyList())
+    val grados: StateFlow<List<GradoEntity>> = _grados
 
     // ============================================================
     // CARGAR DÍAS
@@ -225,6 +238,8 @@ class GradoViewModel(
             )
 
             asistenciaDao.insertarAsistencia(asistencia)
+
+            cargarAsistenciasDelDia(fecha)
         }
     }
 //------------------------------------------------------------------------------------------------
@@ -305,8 +320,11 @@ class GradoViewModel(
     // ============================================================
     fun cargarAsistenciasDelDia(fecha: String) {
         viewModelScope.launch {
-            _asistenciasDelDia.value =
-                asistenciaDao.obtenerAsistenciasPorFechaYGrado(fecha, currentGradoId)
+            asistenciaDao
+                .obtenerAsistenciasPorFechaYGrado(fecha, currentGradoId)
+                .collect { lista ->
+                    _asistenciasDelDia.value = lista
+                }
         }
     }
 
@@ -324,12 +342,14 @@ class GradoViewModel(
                 dia.tipoDia == TipoDia.CLASE_NORMAL ||
                         dia.tipoDia == TipoDia.JORNADA_INSTITUCIONAL
 
-            val asistenciasAyer =
-                asistenciaDao.obtenerAsistenciasPorFechaYGrado(ayer, currentGradoId)
+            asistenciaDao
+                .obtenerAsistenciasPorFechaYGrado(ayer, currentGradoId)
+                .collect { lista ->
 
-            if (eraDiaTrabajable && asistenciasAyer.isEmpty()) {
-                _mostrarDialogoJustificacion.value = true
-            }
+                    if (eraDiaTrabajable && lista.isEmpty()) {
+                        _mostrarDialogoJustificacion.value = true
+                    }
+                }
         }
     }
 
@@ -418,7 +438,7 @@ class GradoViewModel(
     //METODO FINAL PARA CERRAR EL MES
     //--------------------------------------------------------------------------------------------
 
-    fun cerrarMes(
+    fun intentarCerrarMes(
         gradoId: Long,
         yearMonth: YearMonth,
         onResultado: (Boolean) -> Unit
@@ -436,31 +456,15 @@ class GradoViewModel(
     //---------------------------------------------------------------------------------------------
 
     fun cerrarMes(gradoId: Long, yearMonth: YearMonth) {
+
         viewModelScope.launch {
 
-            val desde = yearMonth.atDay(1).toString()
-            val hasta = yearMonth.atEndOfMonth().toString()
-
-            val pendientes = asistenciaDao.contarPendientesDelMes(
-                gradoId,
-                desde,
-                hasta
+            mesCerradoDao.cerrarMes(
+                MesCerradoEntity(
+                    gradoId = gradoId,
+                    yearMonth = yearMonth.toString()
+                )
             )
-
-            if (pendientes > 0) {
-                _estado.value = "Hay asistencias pendientes de definir"
-                return@launch
-            }
-
-            val mes = MesCerradoEntity(
-                gradoId = gradoId,
-                yearMonth = yearMonth.toString(),
-                cerrado = true
-            )
-
-            mesCerradoDao.guardarEstadoMes(mes)
-
-            _estado.value = "Mes cerrado correctamente"
         }
     }
 
@@ -469,52 +473,28 @@ class GradoViewModel(
     //--------------------------------------------------------------------------------------------
 
     fun reabrirMes(gradoId: Long, yearMonth: YearMonth) {
+
         viewModelScope.launch {
 
-            val mes = MesCerradoEntity(
-                gradoId = gradoId,
-                yearMonth = yearMonth.toString(),
-                cerrado = false
+            mesCerradoDao.reabrirMes(
+                gradoId,
+                yearMonth.toString()
             )
-
-            mesCerradoDao.guardarEstadoMes(mes)
-
-            _estado.value = "Mes reabierto"
         }
     }
     //  ----------------------------------------------------------------------------------------------
     //intentar cerrar mes
     //---------------------------------------------------------------------------------------------
 
-    fun intentarCerrarMes() {
-        viewModelScope.launch {
+    suspend fun mesEstaCerrado(
+        gradoId: Long,
+        yearMonth: YearMonth
+    ): Boolean {
 
-            val desde = currentYearMonth.atDay(1).toString()
-            val hasta = currentYearMonth.atEndOfMonth().toString()
-
-            val pendientes = asistenciaDao.contarPendientesDelMes(
-                currentGradoId,
-                desde,
-                hasta
-            )
-
-            if (pendientes > 0) {
-                _estado.value =
-                    "Hay $pendientes asistencias pendientes por definir si son JUSTIFICADAS o INJUSTIFICADAS"
-                return@launch
-            }
-
-            // Si no hay pendientes → cerramos el mes
-            mesCerradoDao.guardarEstadoMes(
-                MesCerradoEntity(
-                    gradoId = currentGradoId,
-                    yearMonth = currentYearMonth.toString(),
-                    cerrado = true
-                )
-            )
-
-            _estado.value = "Mes cerrado correctamente"
-        }
+        return mesCerradoDao.estaCerrado(
+            gradoId,
+            yearMonth.toString()
+        )
     }
     //-------------------------------------Seleccon de  grado-----------------------------------------------
 

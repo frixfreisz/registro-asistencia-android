@@ -142,52 +142,38 @@ fun CalendarioScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 🔹 Botón cerrar mes
-        Button(
-            onClick = {
-                viewModel.intentarCerrarMes()
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Cerrar Mes")
-        }
 
-        if (estado.isNotBlank()) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(estado)
-        }
-    }
+        // 🔹 Diálogo selector tipo de día
+        if (mostrarDialogo && fechaSeleccionada != null) {
 
-    // 🔹 Diálogo selector tipo de día
-    if (mostrarDialogo && fechaSeleccionada != null) {
+            AlertDialog(
+                onDismissRequest = { mostrarDialogo = false },
+                title = { Text("Seleccionar tipo de día") },
+                text = {
+                    Column {
 
-        AlertDialog(
-            onDismissRequest = { mostrarDialogo = false },
-            title = { Text("Seleccionar tipo de día") },
-            text = {
-                Column {
+                        TipoDia.values().forEach { tipo ->
 
-                    TipoDia.values().forEach { tipo ->
-
-                        Text(
-                            text = tipo.name,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    viewModel.actualizarTipoDia(
-                                        gradoId,
-                                        fechaSeleccionada!!,
-                                        tipo
-                                    )
-                                    mostrarDialogo = false
-                                }
-                                .padding(8.dp)
-                        )
+                            Text(
+                                text = tipo.name,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        viewModel.actualizarTipoDia(
+                                            gradoId,
+                                            fechaSeleccionada!!,
+                                            tipo
+                                        )
+                                        mostrarDialogo = false
+                                    }
+                                    .padding(8.dp)
+                            )
+                        }
                     }
-                }
-            },
-            confirmButton = {}
-        )
+                },
+                confirmButton = {}
+            )
+        }
     }
-}
 
+}

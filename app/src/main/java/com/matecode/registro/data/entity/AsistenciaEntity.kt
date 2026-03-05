@@ -18,14 +18,14 @@ import com.matecode.registro.data.enums.EstadoAsistencia
     ],
     indices = [
         Index("alumnoDni"),
-        Index("fecha")
+        Index("fecha"),
+        Index(value = ["gradoId", "fecha"])
     ]
 )
 data class AsistenciaEntity(
     val alumnoDni: String,
-    val fecha: String, // ISO-8601: yyyy-MM-dd
+    val fecha: String,
     val estado: EstadoAsistencia,
     val observacion: String? = null,
     val gradoId: Long
 )
-

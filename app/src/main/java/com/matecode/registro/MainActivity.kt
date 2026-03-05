@@ -21,6 +21,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -136,10 +138,20 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(padding)
                     ) {
 
-                        composable("grados") {
+                        composable(route = "grados") {
+
+                            val grados by viewModel.grados.collectAsState()
+
                             GradosScreen(
-                                onGradoClick = { gradoId ->
+                                grados = grados,
+                                viewModel = viewModel,
+
+                                onAbrirAsistencia = { gradoId ->
                                     navController.navigate("asistencia/$gradoId")
+                                },
+
+                                onAbrirCalendario = { gradoId ->
+                                    navController.navigate("calendario/$gradoId")
                                 }
                             )
                         }

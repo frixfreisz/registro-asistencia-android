@@ -1,47 +1,53 @@
 package com.matecode.registro.ui
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import com.matecode.registro.data.entity.GradoEntity
+import com.matecode.registro.data.viewmodel.GradoViewModel
+import com.matecode.registro.ui.components.GradoCard
+import java.time.YearMonth
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun GradosScreen(
-    onGradoClick: (Long) -> Unit
+    grados: List<GradoEntity>,
+    viewModel: GradoViewModel,
+    onAbrirAsistencia: (Long) -> Unit,
+    onAbrirCalendario: (Long) -> Unit
 ) {
 
-    val grados = listOf(
-        1L to "4° C",
-        2L to "5° C",
-        3L to "6° C"
-    )
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
+    ) {
 
-    Column {
+        items(grados) { grado ->
 
-        Text(
-            text = "REGISTRO DE ASISTENCIA 2026",
-            style = MaterialTheme.typography.headlineMedium
-        )
+            GradoCard(
+                nombre = "${grado.grado.displayName()} ${grado.division.displayName()}",
+                turno = grado.turno.displayName(),
+                mesCerrado = false, // después lo conectamos con la BD
 
-        Spacer(modifier = Modifier.height(24.dp))
+                onAsistencia = {
+                    onAbrirAsistencia(grado.id)
+                },
 
-        grados.forEach { (id, nombre) ->
+                onCalendario = {
+                    onAbrirCalendario(grado.id)
+                },
 
-            Button(
-                onClick = { onGradoClick(id) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            ) {
-                Text(nombre)
-            }
+                onCerrarMes = {
+                    viewModel.cerrarMes(grado.id, YearMonth.now())
+                },
+
+                onReabrirMes = {
+                    viewModel.reabrirMes(grado.id, YearMonth.now())
+                }
+            )
         }
     }
 }

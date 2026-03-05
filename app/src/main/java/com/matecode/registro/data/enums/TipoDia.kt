@@ -11,6 +11,18 @@ enum class TipoDia () {
     PARO_DOCENTE,//NO CUENTA
     VACACIONES;
 
+    fun displayName(): String{
+        return when (this){
+            TipoDia.CLASE_NORMAL -> "Clase normal"
+            TipoDia.JORNADA_INSTITUCIONAL -> "Jornada"
+            TipoDia.CAMBIO_ACTIVIDAD -> "Cambio de actividad"
+            TipoDia.NO_LABORABLE -> "Fin de Semana"
+            TipoDia.FERIADO -> "Feriado"
+            TipoDia.PARO_DOCENTE -> "Paro docente"
+            TipoDia.VACACIONES -> "Receso escolar"
+        }
+    }
+
 
     fun esDiaTrabajado(): Boolean {
         return this == CLASE_NORMAL ||

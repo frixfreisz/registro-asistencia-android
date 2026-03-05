@@ -10,15 +10,34 @@ import com.matecode.registro.data.entity.MesCerradoEntity
 interface MesCerradoDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun guardarEstadoMes(mes: MesCerradoEntity)
+    suspend fun cerrarMes(mes: MesCerradoEntity)
 
     @Query("""
-        SELECT * FROM meses_cerrados
-        WHERE gradoId = :gradoId
-        AND yearMonth = :yearMonth
+        DELETE FROM mes_cerrado
+        WHERE gradoId = :gradoId AND yearMonth = :yearMonth
+    """)
+    suspend fun reabrirMes(
+        gradoId: Long,
+        yearMonth: String
+    )
+
+    @Query("""
+        SELECT * FROM mes_cerrado
+        WHERE gradoId = :gradoId AND yearMonth = :yearMonth
+        LIMIT 1
     """)
     suspend fun obtenerEstadoMes(
         gradoId: Long,
         yearMonth: String
     ): MesCerradoEntity?
+
+    @Query("""
+        SELECT COUNT(*) > 0
+        FROM mes_cerrado
+        WHERE gradoId = :gradoId AND yearMonth = :yearMonth
+    """)
+    suspend fun estaCerrado(
+        gradoId: Long,
+        yearMonth: String
+    ): Boolean
 }

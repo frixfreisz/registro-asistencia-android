@@ -1,5 +1,6 @@
 package com.matecode.registro.data.database
 
+
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
@@ -26,7 +27,7 @@ import com.matecode.registro.data.entity.MesCerradoEntity
         DiaGradoEntity::class,
         MesCerradoEntity::class
     ],
-    version = 17, // 🔥 SUBÍ CADA VEZ QUE CAMBIES UNA ENTITY
+    version = 19, // 🔥 SUBÍ CADA VEZ QUE CAMBIES UNA ENTITY
     exportSchema = false
 )
 @TypeConverters(

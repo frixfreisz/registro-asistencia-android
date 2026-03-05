@@ -6,7 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,7 +17,6 @@ import com.matecode.registro.data.enums.TipoDia
 import com.matecode.registro.data.viewmodel.GradoViewModel
 import java.time.LocalDate
 import java.time.YearMonth
-
 @Suppress("NewApi")
 @Composable
 fun AsistenciaScreen(
@@ -26,6 +25,7 @@ fun AsistenciaScreen(
     onVolver: () -> Unit,
     onCerrarMes: () -> Unit
 ) {
+    var mesCerrado by remember { mutableStateOf(false) }
 
     var mostrarCierre by remember { mutableStateOf(false) }
 
@@ -45,14 +45,20 @@ fun AsistenciaScreen(
     val mostrarDialogo by viewModel.mostrarDialogoJustificacion.collectAsState()
 
 
-
-
     val fechaHoy = LocalDate.now().toString()
+
+    LaunchedEffect(Unit) {
+
+        mesCerrado = viewModel.mesEstaCerrado(
+            gradoId,
+            YearMonth.now()
+        )
+    }
 
     LaunchedEffect(gradoId) {
         viewModel.seleccionarGrado(gradoId, YearMonth.now())
         viewModel.cargarAsistenciasDelDia(fechaHoy)
-        viewModel.verificarDiaAnterior()
+        //viewModel.verificarDiaAnterior()
 
     }
     Text("Alumnos cargados: ${alumnos.size}")
@@ -82,7 +88,7 @@ fun AsistenciaScreen(
                 )
             }
         )
-        if (mostrarDialogo) {
+      /**  if (mostrarDialogo) {
             AlertDialog(
                 onDismissRequest = { },
                 title = { Text("No se tomó asistencia ayer") },
@@ -95,6 +101,7 @@ fun AsistenciaScreen(
                         Button(
                             onClick = {
                                 viewModel.justificarDiaAnterior(TipoDia.CAMBIO_ACTIVIDAD)
+
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -126,16 +133,31 @@ fun AsistenciaScreen(
             Button(
                 onClick = { mostrarCierre = true },
                 modifier = Modifier.fillMaxWidth(),
-            ) {
+
+                ) {
                 Text("Ir a Cierre de Mes")
             }
         }
-
+       **/
 
         Spacer(modifier = Modifier.height(16.dp))
         HorizontalDivider()
         Spacer(modifier = Modifier.height(16.dp))
 
+        if (mesCerrado) {
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "⚠ MES CERRADO - NO SE PUEDE MODIFICAR LA ASISTENCIA",
+                    modifier = Modifier.padding(12.dp),
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+        }
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -147,15 +169,22 @@ fun AsistenciaScreen(
                 AlumnoRow(
                     alumno = alumno,
                     estadoActual = asistenciaAlumno?.estado,
-                    enabled = puedeTomarAsistencia,
+                    enabled = puedeTomarAsistencia && !mesCerrado,
                     onGuardarAsistencia = { estado ->
+
                         viewModel.marcarAsistencia(
                             alumnoId = alumno.dniId,
                             fecha = fechaHoy,
                             estado = estado
                         )
                     }
-                )
+                ){ estado ->
+                    viewModel.marcarAsistencia(
+                        alumnoId = alumno.dniId,
+                        fecha = fechaHoy,
+                        estado = estado
+                    )
+                }
             }
         }
     }
@@ -216,7 +245,7 @@ fun AsistenciaHeader(
             ) {
 
                 IconButton(onClick = onVolver) {
-                    Icon(Icons.Default.ArrowBack, "Volver")
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver")
                 }
 
                 Text(
@@ -244,7 +273,7 @@ fun AsistenciaHeader(
             Box {
 
                 OutlinedButton(onClick = { expanded = true }) {
-                    Text(tipoDiaActual?.name ?: "Seleccionar tipo de día")
+                    Text(tipoDiaActual?.displayName() ?: "Seleccionar tipo de día")
                 }
 
                 DropdownMenu(

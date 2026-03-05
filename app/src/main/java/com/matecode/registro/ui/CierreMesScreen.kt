@@ -38,8 +38,20 @@ fun CierreMesScreen(
 
         Button(
             onClick = {
-                viewModel.intentarCerrarMes()
-                mensaje = "Intentando cerrar el mes..."
+
+                viewModel.intentarCerrarMes(
+                    gradoId,
+                    yearMonth
+                ) { puedeCerrar ->
+
+                    if (puedeCerrar) {
+                        viewModel.cerrarMes(gradoId, yearMonth)
+                        mensaje = "Mes cerrado correctamente"
+                    } else {
+                        mensaje = "No se puede cerrar el mes: hay asistencias pendientes"
+                    }
+                }
+
             },
             modifier = Modifier.fillMaxWidth()
         ) {
