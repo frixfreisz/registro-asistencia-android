@@ -14,24 +14,29 @@ interface AsistenciaDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertarAsistencia(asistencia: AsistenciaEntity)
 
-    @Query("""
+    @Query(
+        """
         SELECT * FROM asistencias 
         WHERE fecha = :fecha
-    """)
+    """
+    )
     suspend fun obtenerAsistenciasPorFecha(
         fecha: String
     ): List<AsistenciaEntity>
 
-    @Query("""
+    @Query(
+        """
         SELECT * FROM asistencias
         WHERE fecha = :fecha AND gradoId = :gradoId
-    """)
+    """
+    )
     fun obtenerAsistenciasPorFechaYGrado(
         fecha: String,
         gradoId: Long
     ): Flow<List<AsistenciaEntity>>
 
-    @Query("""
+    @Query(
+        """
         SELECT alumnoDni,
                SUM(CASE WHEN estado = 'AUSENTE_JUSTIFICADA' THEN 1 ELSE 0 END) as justificadas,
                SUM(CASE WHEN estado = 'AUSENTE_INJUSTIFICADA' THEN 1 ELSE 0 END) as injustificadas
@@ -39,34 +44,58 @@ interface AsistenciaDao {
         WHERE gradoId = :gradoId
         AND fecha BETWEEN :desde AND :hasta
         GROUP BY alumnoDni
-    """)
+    """
+    )
     suspend fun resumenMensualPorAlumno(
         gradoId: Long,
         desde: String,
         hasta: String
     ): List<ResumenAsistencia>
 
-    @Query("""
+    @Query(
+        """
         SELECT COUNT(*) FROM asistencias
         WHERE gradoId = :gradoId
         AND fecha BETWEEN :desde AND :hasta
         AND estado = 'DEFINIR_DESPUES'
-    """)
+    """
+    )
     suspend fun contarPendientesDelMes(
         gradoId: Long,
         desde: String,
         hasta: String
     ): Int
 
-    @Query("""
+    @Query(
+        """
         SELECT * FROM asistencias
         WHERE gradoId = :gradoId
         AND fecha BETWEEN :desde AND :hasta
         AND estado = 'DEFINIR_DESPUES'
-    """)
+    """
+    )
     suspend fun obtenerPendientesDelMes(
         gradoId: Long,
         desde: String,
         hasta: String
     ): List<AsistenciaEntity>
+
+    //---------------------------------
+//-----RESUMEN DE ASISTENCIA PLANILLA
+    //-----------------------------------
+
+    @Query("""
+SELECT * FROM asistencias
+WHERE gradoId = :gradoId
+AND fecha BETWEEN :desde AND :hasta
+""")
+    suspend fun obtenerAsistenciasDelMes(
+        gradoId: Long,
+        desde: String,
+        hasta: String
+    ): List<AsistenciaEntity>
+
+
+
+
 }

@@ -32,4 +32,14 @@ interface AlumnoDao {
 
     @Query("SELECT COUNT(*) FROM alumnos")
     suspend fun contarAlumnos(): Int
+
+
+    @Query("""
+SELECT * FROM alumnos
+WHERE gradoId = :gradoId
+ORDER BY apellido
+""")
+    suspend fun getAlumnosPorGradoSuspend(
+        gradoId: Long
+    ): List<AlumnoEntity>
 }

@@ -3,6 +3,7 @@ package com.matecode.registro.ui.components
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
@@ -20,7 +21,8 @@ fun GradoCard(
     onAsistencia: () -> Unit,
     onCalendario: () -> Unit,
     onCerrarMes: () -> Unit,
-    onReabrirMes: () -> Unit
+    onReabrirMes: () -> Unit,
+    onInformeClick: () -> Unit
 ) {
 
     Card(
@@ -48,7 +50,7 @@ fun GradoCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = if (mesCerrado) "🔒 Mes cerrado" else " Mes abierto",
+                text = if (mesCerrado) "🔒 Mes cerrado" else "Mes abierto",
                 color = if (mesCerrado) Color.Red else Color(0xFF2E7D32)
             )
 
@@ -84,6 +86,12 @@ fun GradoCard(
                     icon = Icons.Default.Edit,
                     label = "Reabrir",
                     onClick = onReabrirMes
+                )
+
+                ActionIcon(
+                    icon = Icons.AutoMirrored.Filled.List,
+                    label = "Informe",
+                    onClick = onInformeClick
                 )
             }
         }

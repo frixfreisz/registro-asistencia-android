@@ -52,6 +52,16 @@ interface DiaGradoDao {
     ): Int
 
 
-
+    @Query("""
+SELECT * FROM dias_grado
+WHERE gradoId = :gradoId
+AND fecha BETWEEN :desde AND :hasta
+ORDER BY fecha
+""")
+    suspend fun obtenerDiasDelMes(
+        gradoId: Long,
+        desde: String,
+        hasta: String
+    ): List<DiaGradoEntity>
 
 }

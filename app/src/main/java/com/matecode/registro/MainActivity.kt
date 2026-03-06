@@ -23,7 +23,10 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
@@ -32,11 +35,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.matecode.registro.data.database.AppDatabase
+import com.matecode.registro.data.informe.InformeMensual
 import com.matecode.registro.data.viewmodel.GradoViewModel
 import com.matecode.registro.data.viewmodel.GradoViewModelFactory
 import com.matecode.registro.ui.AsistenciaScreen
 import com.matecode.registro.ui.CalendarioScreen
 import com.matecode.registro.ui.GradosScreen
+import com.matecode.registro.ui.InformeMensualScreen
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -62,6 +67,9 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val drawerState = rememberDrawerState(DrawerValue.Closed)
             val scope = rememberCoroutineScope()
+            var informeActual by remember {
+                mutableStateOf<InformeMensual?>(null)
+            }
 
             ModalNavigationDrawer(
                 drawerState = drawerState,
@@ -128,8 +136,6 @@ class MainActivity : ComponentActivity() {
 
                     }
 
-                    // Tu NavHost o pantalla principal acá
-
 
 
                     NavHost(
@@ -142,16 +148,16 @@ class MainActivity : ComponentActivity() {
 
                             val grados by viewModel.grados.collectAsState()
 
+
+
                             GradosScreen(
                                 grados = grados,
                                 viewModel = viewModel,
-
-                                onAbrirAsistencia = { gradoId ->
-                                    navController.navigate("asistencia/$gradoId")
-                                },
-
-                                onAbrirCalendario = { gradoId ->
-                                    navController.navigate("calendario/$gradoId")
+                                onAbrirAsistencia = { /* navegación */ },
+                                onAbrirCalendario = { /* navegación */ },
+                                onInformeGenerado = { informe ->
+                                    informeActual = informe
+                                    navController.navigate("informe_mensual")
                                 }
                             )
                         }
@@ -186,6 +192,12 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                         }
+                        composable("informe_mensual") {
+                            informeActual?.let {
+                                InformeMensualScreen(informe = it)
+                            }
+                        }
+
                     }
                 }
             }

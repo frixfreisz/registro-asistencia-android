@@ -20,6 +20,8 @@ import com.matecode.registro.data.enums.Grado
 import com.matecode.registro.data.enums.TipoDia
 import com.matecode.registro.data.enums.Turno
 import com.matecode.registro.data.generator.CalendarioGenerator
+import com.matecode.registro.data.informe.InformeMensual
+import com.matecode.registro.data.informe.InformeMensualGenerator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -558,5 +560,39 @@ class GradoViewModel(
         )
     }
 
+//------------------------------------------------------------------------------------------
+    //INFORME MENSUAL
+    //-------------------------------------------------------------------------------------
+suspend fun generarInformeMensual(
+    gradoId: Long,
+    yearMonth: YearMonth
+): InformeMensual {
+
+    val desde = yearMonth.atDay(1).toString()
+    val hasta = yearMonth.atEndOfMonth().toString()
+
+    val alumnos = alumnoDao.getAlumnosPorGradoSuspend(gradoId)
+
+    val asistencias = asistenciaDao.obtenerAsistenciasDelMes(
+        gradoId,
+        desde,
+        hasta
+    )
+
+    val dias = diaGradoDao.obtenerDiasDelMes(
+        gradoId,
+        desde,
+        hasta
+    )
+
+    return InformeMensualGenerator.generar(
+        alumnos = alumnos,
+        asistencias = asistencias,
+        dias = dias,
+        yearMonth = yearMonth,
+        grado = "",
+        turno = ""
+    )
+}
 
 }
