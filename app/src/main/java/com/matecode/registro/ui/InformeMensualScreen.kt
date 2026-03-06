@@ -1,5 +1,6 @@
 package com.matecode.registro.ui
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -7,9 +8,50 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.matecode.registro.data.informe.InformeMensual
+
+@Composable
+fun CeldaTabla(
+    texto: String,
+    ancho: Int,
+    colorTexto: Color = Color.Black,
+    alineacion: Alignment = Alignment.CenterStart
+) {
+
+    Box(
+        modifier = Modifier
+            .width(ancho.dp)
+            .border(1.dp, Color.Black)
+            .padding(start = 4.dp),
+        contentAlignment = alineacion
+    ) {
+
+        Text(
+            text = texto,
+            color = colorTexto,
+            style = MaterialTheme.typography.bodySmall
+        )
+    }
+}
+
+fun colorAsistencia(simbolo: String): Color {
+
+    return when (simbolo) {
+
+        "P" -> Color(0xFF2E7D32)
+
+        "A" -> Color(0xFFC62828)
+
+        "-" -> Color.Gray
+
+        else -> Color.Black
+    }
+}
 
 @Composable
 fun InformeMensualScreen(
@@ -35,120 +77,92 @@ fun InformeMensualScreen(
             style = MaterialTheme.typography.titleLarge
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
 
+
+        // ENCABEZADO
         Row {
 
-            Text("N°", modifier = Modifier.width(40.dp))
+            CeldaTabla("N°", 40, alineacion = Alignment.Center)
 
-            Text(
-                "Alumno",
-                modifier = Modifier.width(220.dp)
-            )
+            CeldaTabla("Alumno", 220, alineacion = Alignment.Center)
 
             informe.alumnos.firstOrNull()?.asistencias?.keys?.forEach { dia ->
 
                 val numeroDia = dia.takeLast(2)
 
-                Text(
-                    text = numeroDia,
-                    modifier = Modifier.width(28.dp)
-                )
+                CeldaTabla(numeroDia, 28)
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
+            CeldaTabla("P", 40, alineacion = Alignment.Center)
 
-            Text(
-                "P",
-                modifier = Modifier.width(40.dp)
-            )
-
-            Text(
-                "A",
-                modifier = Modifier.width(40.dp)
-            )
+            CeldaTabla("A", 40, alineacion = Alignment.Center)
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+     //   Spacer(modifier = Modifier.height(8.dp))
 
         // VARONES
         varones.forEachIndexed { index, alumno ->
 
             Row {
 
-                Text(
-                    text = String.format("%02d", index + 1),
-                    modifier = Modifier.width(40.dp)
-                )
+                CeldaTabla(String.format("%02d", index + 1), 40, )
 
-                Text(
-                    alumno.nombre,
-                    modifier = Modifier.width(220.dp)
-                )
+                CeldaTabla(alumno.nombre, 220)
 
-                alumno.asistencias.values.forEach { simbolo ->
+                alumno.asistencias.forEach { (_, simbolo) ->
 
-                    Text(
+                    CeldaTabla(
                         simbolo,
-                        modifier = Modifier.width(28.dp)
+                        28, alineacion = Alignment.Center,
+                        colorTexto = colorAsistencia(simbolo)
                     )
                 }
 
-                Spacer(modifier = Modifier.width(8.dp))
+                CeldaTabla(alumno.totalAsistencias.toString(), 40, alineacion = Alignment.Center)
 
-                Text(
-                    alumno.totalAsistencias.toString(),
-                    modifier = Modifier.width(40.dp)
-                )
+                CeldaTabla(alumno.totalInasistencias.toString(), 40, alineacion = Alignment.Center)
+            }
+        }
+        val cantidadDias = informe.alumnos.firstOrNull()?.asistencias?.size ?: 0
 
-                Text(
-                    alumno.totalInasistencias.toString(),
-                    modifier = Modifier.width(40.dp)
-                )
+        Row {
+
+            CeldaTabla("", 40)
+
+            CeldaTabla("", 220)
+
+            repeat(cantidadDias) {
+                CeldaTabla("", 28)
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            CeldaTabla("", 40)
+
+            CeldaTabla("", 40)
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
 
         // MUJERES
         mujeres.forEachIndexed { index, alumno ->
 
             Row {
 
-                Text(
-                    text = String.format("%02d", index + 1),
-                    modifier = Modifier.width(40.dp)
-                )
+                CeldaTabla(String.format("%02d", index + 1), 40)
 
-                Text(
-                    alumno.nombre,
-                    modifier = Modifier.width(220.dp)
-                )
+                CeldaTabla(alumno.nombre, 220)
 
-                alumno.asistencias.values.forEach { simbolo ->
+                alumno.asistencias.forEach { (_, simbolo) ->
 
-                    Text(
+                    CeldaTabla(
                         simbolo,
-                        modifier = Modifier.width(28.dp)
+                        28, alineacion = Alignment.Center,
+                        colorTexto = colorAsistencia(simbolo)
                     )
                 }
 
-                Spacer(modifier = Modifier.width(8.dp))
+                CeldaTabla(alumno.totalAsistencias.toString(), 40, alineacion = Alignment.Center)
 
-                Text(
-                    alumno.totalAsistencias.toString(),
-                    modifier = Modifier.width(40.dp)
-                )
-
-                Text(
-                    alumno.totalInasistencias.toString(),
-                    modifier = Modifier.width(40.dp)
-                )
+                CeldaTabla(alumno.totalInasistencias.toString(), 40, alineacion = Alignment.Center)
             }
-
-            Spacer(modifier = Modifier.height(4.dp))
         }
     }
 }

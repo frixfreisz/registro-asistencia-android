@@ -153,8 +153,12 @@ class MainActivity : ComponentActivity() {
                             GradosScreen(
                                 grados = grados,
                                 viewModel = viewModel,
-                                onAbrirAsistencia = { /* navegación */ },
-                                onAbrirCalendario = { /* navegación */ },
+                                onAbrirAsistencia = { gradoId ->
+                                    navController.navigate("asistencia/$gradoId")
+                                },
+                                onAbrirCalendario = { gradoId ->
+                                    navController.navigate(("calendario/$gradoId"))
+                                },
                                 onInformeGenerado = { informe ->
                                     informeActual = informe
                                     navController.navigate("informe_mensual")
