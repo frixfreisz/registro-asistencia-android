@@ -49,6 +49,7 @@ class GradoViewModel(
             }
         }
     }
+
     private lateinit var gradoMap: Map<Pair<Grado, Division>, Long>
 
     suspend fun estaMesCerrado(): Boolean {
@@ -560,39 +561,52 @@ class GradoViewModel(
         )
     }
 
-//------------------------------------------------------------------------------------------
+
+    //------------------------------------------------------------------------------------------
     //INFORME MENSUAL
     //-------------------------------------------------------------------------------------
-suspend fun generarInformeMensual(
-    gradoId: Long,
-    yearMonth: YearMonth
-): InformeMensual {
+    suspend fun generarInformeMensual(
+        gradoId: Long,
+        yearMonth: YearMonth
+    ): InformeMensual {
 
-    val desde = yearMonth.atDay(1).toString()
-    val hasta = yearMonth.atEndOfMonth().toString()
+        val desde = yearMonth.atDay(1).toString()
+        val hasta = yearMonth.atEndOfMonth().toString()
 
-    val alumnos = alumnoDao.getAlumnosPorGradoSuspend(gradoId)
+        val alumnos = alumnoDao.getAlumnosPorGradoSuspend(gradoId)
 
-    val asistencias = asistenciaDao.obtenerAsistenciasDelMes(
-        gradoId,
-        desde,
-        hasta
-    )
+        val asistencias = asistenciaDao.obtenerAsistenciasDelMes(
+            gradoId,
+            desde,
+            hasta
+        )
 
-    val dias = diaGradoDao.obtenerDiasDelMes(
-        gradoId,
-        desde,
-        hasta
-    )
+        val dias = diaGradoDao.obtenerDiasDelMes(
+            gradoId,
+            desde,
+            hasta
+        )
 
-    return InformeMensualGenerator.generar(
-        alumnos = alumnos,
-        asistencias = asistencias,
-        dias = dias,
-        yearMonth = yearMonth,
-        grado = "",
-        turno = ""
-    )
-}
+        // Obtener información del grado
+        val gradoEntity = gradoDao.obtenerPorId(gradoId)
 
+        val gradoNombre =
+            "${gradoEntity.grado.displayName()} ${gradoEntity.division.displayName()}"
+
+        val turnoNombre = gradoEntity.turno.displayName()
+
+        val cicloNombre =
+            if (gradoEntity.grado.ordinal <= 2) "Primer Ciclo"
+            else "Segundo Ciclo"
+
+        return InformeMensualGenerator.generar(
+            alumnos = alumnos,
+            asistencias = asistencias,
+            dias = dias,
+            yearMonth = yearMonth,
+            grado = gradoNombre,
+            turno = turnoNombre,
+
+        )
+    }
 }

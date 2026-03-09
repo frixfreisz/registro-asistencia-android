@@ -22,4 +22,6 @@ interface GradoDao {
     @Query("SELECT * FROM grados ORDER BY grado, division")
     fun obtenerGrados(): Flow<List<GradoEntity>>
 
+    @Query("SELECT * FROM grados WHERE id = :id")
+    suspend fun obtenerPorId(id: Long): GradoEntity
 }

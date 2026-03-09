@@ -6,6 +6,7 @@ import com.matecode.registro.data.entity.AlumnoEntity
 import com.matecode.registro.data.entity.AsistenciaEntity
 import com.matecode.registro.data.entity.DiaGradoEntity
 import com.matecode.registro.data.enums.EstadoAsistencia
+import com.matecode.registro.data.enums.TipoDia
 import java.time.YearMonth
 
 object InformeMensualGenerator {
@@ -17,7 +18,9 @@ object InformeMensualGenerator {
         dias: List<DiaGradoEntity>,
         yearMonth: YearMonth,
         grado: String,
-        turno: String
+        turno: String,
+
+
     ): InformeMensual {
 
         val diasTrabajados = dias.count { it.tipoDia.esDiaTrabajado() }
@@ -33,7 +36,7 @@ object InformeMensualGenerator {
 
             val numero = String.format("%02d", index + 1)
 
-            val mapaCeldas = mutableMapOf<String, String>()
+            val mapaCeldas = mutableMapOf<String, Pair<String, TipoDia>>()
 
             var presentes = 0
             var ausentes = 0
@@ -50,7 +53,7 @@ object InformeMensualGenerator {
                     asistencia?.estado
                 )
 
-                mapaCeldas[dia.fecha] = simbolo
+                mapaCeldas[dia.fecha] = Pair(simbolo, dia.tipoDia)
 
                 if (simbolo == "P") presentes++
                 if (simbolo == "A") ausentes++
@@ -71,11 +74,17 @@ object InformeMensualGenerator {
         return InformeMensual(
             grado = grado,
             turno = turno,
-            mes = yearMonth.month.name,
+            mes = yearMonth.month.getDisplayName(
+                java.time.format.TextStyle.FULL,
+                java.util.Locale("es", "ES")
+            ).replaceFirstChar { it.uppercase() },
             anio = yearMonth.year,
             diasTrabajados = diasTrabajados,
             alumnos = listaInforme
+
         )
+
+
     }
 
     private fun simboloCelda(
